@@ -8,6 +8,10 @@ import MenuItem from "./menu/MenuItem";
 import SearchOrder from "./order/SearchOrder";
 import { loader as orderLoader } from "./order/Order";
 import { action as createOrderAction } from "./order/CreateOrder";
+import CreateUser from "./user/CreateUser";
+import Username from "./user/Username";
+import CartItem from "./cart/CartItem";
+import OrderItem from "./order/OrderItem";
 
 export {
   Menu,
@@ -20,4 +24,8 @@ export {
   SearchOrder,
   orderLoader,
   createOrderAction,
+  CreateUser,
+  Username,
+  CartItem,
+  OrderItem,
 };
