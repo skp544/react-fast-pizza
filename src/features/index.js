@@ -12,6 +12,9 @@ import CreateUser from "./user/CreateUser";
 import Username from "./user/Username";
 import CartItem from "./cart/CartItem";
 import OrderItem from "./order/OrderItem";
+import EmptyCart from "./cart/EmptyCart";
+import DeleteItem from "./cart/DeleteItem";
+import UpdateItemQuantity from "./cart/UpdateItemQuantity";
 
 export {
   Menu,
@@ -28,4 +31,7 @@ export {
   Username,
   CartItem,
   OrderItem,
+  EmptyCart,
+  DeleteItem,
+  UpdateItemQuantity,
 };
