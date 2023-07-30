@@ -6,6 +6,7 @@ import {
   createOrderAction,
   menuLoader,
   orderLoader,
+  updateOrderAction,
 } from "./features";
 import { AppLayout, Error, Home } from "./ui";
 
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
         element: <Order />,
         loader: orderLoader,
         errorElement: <Error />,
+        action: updateOrderAction,
       },
     ],
   },

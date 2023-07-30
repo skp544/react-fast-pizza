@@ -1,10 +1,17 @@
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
 import { Button } from "../../ui";
-import { useSelector } from "react-redux";
-import { clearCart, getCart } from "../../redux/slices/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearCart,
+  getCart,
+  getTotalCartPrice,
+} from "../../redux/slices/cartSlice";
 import { EmptyCart } from "../";
 import store from "../../redux/store";
+import { formatCurrency } from "../../utils/helpers";
+import { useState } from "react";
+import { fetchAddress } from "../../redux/slices/userSlice";
 
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
@@ -12,14 +19,28 @@ const isValidPhone = (str) =>
   );
 
 const CreateOrder = () => {
-  const { username } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const [withPriority, setWithPriority] = useState(false);
+  const {
+    username,
+    status: addressStatus,
+    position,
+    address,
+    error: errorAddress,
+  } = useSelector((state) => state.user);
+
+  const isLoadingAddress = addressStatus === "loading";
+
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
   const formErrors = useActionData();
-  // const [withPriority, setWithPriority] = useState(false);
   const cart = useSelector(getCart);
+  const totalCartPrice = useSelector(getTotalCartPrice);
 
+  const priorityPrice = withPriority ? totalCartPrice * 0.2 : 0;
+
+  const totalPrice = totalCartPrice + priorityPrice;
   if (!cart.length) return <EmptyCart />;
 
   return (
@@ -59,10 +80,32 @@ const CreateOrder = () => {
             <input
               type="text"
               name="address"
+              disabled={isLoadingAddress}
+              defaultValue={address}
               required
               className="input w-full"
             />
+            {addressStatus === "error" && (
+              <p className="mt-2 rounded-md bg-red-100 p-2 text-xs text-red-700">
+                {errorAddress}
+              </p>
+            )}
           </div>
+
+          {!position.latitude && !position.longitude && (
+            <span className="absolute right-[3px] top-[3px] z-50  md:right-[5px] md:top-[5px]">
+              <Button
+                type={"small"}
+                disabled={isLoadingAddress}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(fetchAddress());
+                }}
+              >
+                Get Position
+              </Button>
+            </span>
+          )}
         </div>
 
         <div className="mb-12 flex items-center gap-5">
@@ -71,8 +114,8 @@ const CreateOrder = () => {
             name="priority"
             id="priority"
             className="h-6 w-6 accent-yellow-400 focus:outline-none focus:ring focus:ring-yellow-400 focus:ring-offset-2"
-            // value={withPriority}
-            // onChange={(e) => setWithPriority(e.target.checked)}
+            value={withPriority}
+            onChange={(e) => setWithPriority(e.target.checked)}
           />
           <label htmlFor="priority" className="font-medium">
             Want to yo give your order priority?
@@ -81,8 +124,19 @@ const CreateOrder = () => {
 
         <div>
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
-          <Button disabled={isSubmitting} type="primary">
-            {isSubmitting ? "Placing order..." : "Order now"}
+          <input
+            type="hidden"
+            name="position"
+            value={
+              position.longitude && position.longitude
+                ? `${position.latitude},${position.longitude}`
+                : ""
+            }
+          />
+          <Button disabled={isSubmitting || isLoadingAddress} type="primary">
+            {isSubmitting
+              ? "Placing order..."
+              : `Order now from  ${formatCurrency(totalPrice)}`}
           </Button>
         </div>
       </Form>
@@ -97,7 +151,7 @@ export async function action({ request }) {
   const order = {
     ...data,
     cart: JSON.parse(data.cart),
-    priority: data.priority === "on",
+    priority: data.priority === "true",
   };
 
   const errors = {};

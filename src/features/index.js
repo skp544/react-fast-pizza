@@ -15,6 +15,7 @@ import OrderItem from "./order/OrderItem";
 import EmptyCart from "./cart/EmptyCart";
 import DeleteItem from "./cart/DeleteItem";
 import UpdateItemQuantity from "./cart/UpdateItemQuantity";
+import UpdateOrder, { action as updateOrderAction } from "./order/UpdateOrder";
 
 export {
   Menu,
@@ -34,4 +35,6 @@ export {
   EmptyCart,
   DeleteItem,
   UpdateItemQuantity,
+  UpdateOrder,
+  updateOrderAction,
 };
